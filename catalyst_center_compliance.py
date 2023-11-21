@@ -68,9 +68,7 @@ def main():
     network_compliance_info = get_compliance_response['response']
     logging.info(' Collected Catalyst Center network compliance state')
 
-    pprint(network_compliance_info)
-
-    # sort the list of all compliance status, by device Id
+    # sort the list of compliance status, by device Id
     network_compliance = sorted(network_compliance_info, key=lambda x: x['deviceUuid'])
 
     # identify all compliance checks in environment
