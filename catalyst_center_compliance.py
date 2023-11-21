@@ -24,12 +24,8 @@ import logging
 import os
 import time
 import json
-import yaml
-import base64
 
-from github import Github
 from datetime import datetime
-
 from dnacentersdk import DNACenterAPI
 from dotenv import load_dotenv
 from requests.auth import HTTPBasicAuth  # for Basic Auth
@@ -41,12 +37,6 @@ load_dotenv('environment.env')
 DNAC_URL = os.getenv('DNAC_URL')
 DNAC_USER = os.getenv('DNAC_USER')
 DNAC_PASS = os.getenv('DNAC_PASS')
-
-GITHUB_USERNAME = os.getenv('GITHUB_USERNAME')
-GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
-GITHUB_REPO = os.getenv('GITHUB_NETWORK_STATE_REPO')
-
-NETWORK_STATE_PATH = 'network_state/'
 
 os.environ['TZ'] = 'America/Los_Angeles'  # define the timezone for PST
 time.tzset()  # adjust the timezone, more info https://help.pythonanywhere.com/pages/SettingTheTimezone/
@@ -69,10 +59,6 @@ def main():
     logging.info(' Application "catalyst_center_compliance.py" Start, ' + current_time)
 
     # verify if folder for state files exist
-
-    if not os.path.exists(NETWORK_STATE_PATH):
-        # Create a new directory because it does not exist
-        os.makedirs(NETWORK_STATE_PATH)
 
     # create a DNACenterAPI "Connection Object" to use the Python SDK
     dnac_api = DNACenterAPI(username=DNAC_USER, password=DNAC_PASS, base_url=DNAC_URL, version='2.3.5.3',
