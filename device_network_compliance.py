@@ -20,23 +20,19 @@ __version__ = "0.1.0"
 __copyright__ = "Copyright (c) 2023 Cisco and/or its affiliates."
 __license__ = "Cisco Sample Code License, Version 1.1"
 
+import difflib
+import json
 import logging
 import os
 import time
-import json
-import yaml
-import base64
-import github_apis
-import difflib
-
-from github import Github
 from datetime import datetime
 
+import yaml
 from dnacentersdk import DNACenterAPI
 from dotenv import load_dotenv
 from requests.auth import HTTPBasicAuth  # for Basic Auth
-from pprint import pprint
 
+import github_apis
 
 load_dotenv('environment.env')
 
@@ -57,69 +53,11 @@ CATALYST_CENTER_AUTH = HTTPBasicAuth(CATALYST_CENTER_USER, CATALYST_CENTER_PASS)
 FILE_NAME = 'custom_network_compliance.yaml'
 
 
-def compare_configs(cfg1, cfg2):
-    """
-    This function, using the unified diff function, will compare two config files and identify the changes.
-    '+' or '-' will be prepended in front of the lines with changes
-    :param cfg1: old configuration file path and filename
-    :param cfg2: new configuration file path and filename
-    :return: text with the configuration lines that changed. The return will include the configuration for the sections
-    that include the changes
-    """
-
-    # open the old and new configuration fiels
-    f1 = open(cfg1, 'r')
-    old_cfg = f1.readlines()
-    f1.close()
-
-    f2 = open(cfg2, 'r')
-    new_cfg = f2.readlines()
-    f2.close()
-
-    # compare the two specified config files {cfg1} and {cfg2}
-    d = difflib.unified_diff(old_cfg, new_cfg, n=9)
-
-    # create a diff_list that will include all the lines that changed
-    # create a diff_output string that will collect the generator output from the unified_diff function
-    diff_list = []
-    diff_output = ''
-
-    for line in d:
-        diff_output += line
-        if line.find('Current configuration') == -1:
-            if line.find('Last configuration change') == -1:
-                if (line.find('+++') == -1) and (line.find('---') == -1):
-                    if (line.find('-!') == -1) and (line.find('+!') == -1):
-                        if line.startswith('+'):
-                            diff_list.append('\n' + line)
-                        elif line.startswith('-'):
-                            diff_list.append('\n' + line)
-
-    # process the diff_output to select only the sections between '!' characters for the sections that changed,
-    # replace the empty '+' or '-' lines with space
-    diff_output = diff_output.replace('+!', '!')
-    diff_output = diff_output.replace('-!', '!')
-    diff_output_list = diff_output.split('!')
-
-    all_changes = []
-
-    for changes in diff_list:
-        for config_changes in diff_output_list:
-            if changes in config_changes:
-                if config_changes not in all_changes:
-                    all_changes.append(config_changes)
-
-    # create a config_text string with all the sections that include changes
-    config_text = ''
-    for items in all_changes:
-        config_text += items
-
-    return config_text
-
-
 def main():
     """
-    This app will pull custom configuration rules from GitHub and identify if all devices are compliant with the rules.
+    This application will pull custom configurations form GitHub:
+     - filters to match the devices, example device role, family
+     - CLI commands that will be verified on each device
     """
 
     # logging, debug level, to file {application_run.log}
@@ -138,7 +76,8 @@ def main():
     logging.info(' Repo "' + GITHUB_REPO + '" found!')
 
     # get the network settings intent file
-    file_content = github_apis.get_repo_file_content(username=GITHUB_USERNAME, repo_name=GITHUB_REPO, file_name=FILE_NAME)
+    file_content = github_apis.get_repo_file_content(username=GITHUB_USERNAME, repo_name=GITHUB_REPO,
+                                                     file_name=FILE_NAME)
     logging.info(' File "' + FILE_NAME + '" found!')
 
     # decode the YAMl file
@@ -169,7 +108,8 @@ def main():
     logging.info('   device_family: ' + device_family)
 
     # create a DNACenterAPI "Connection Object" to use the Python SDK
-    catalyst_center_api = DNACenterAPI(username=CATALYST_CENTER_USER, password=CATALYST_CENTER_PASS, base_url=CATALYST_CENTER_URL, version='2.3.5.3',
+    catalyst_center_api = DNACenterAPI(username=CATALYST_CENTER_USER, password=CATALYST_CENTER_PASS,
+                                       base_url=CATALYST_CENTER_URL, version='2.3.5.3',
                                        verify=False)
 
     # collect device inventory
@@ -274,8 +214,6 @@ def main():
 
     date_time = str(datetime.now().replace(microsecond=0))
     logging.info(' End of Application "device_network_compliance.py" Run: ' + date_time)
-
-
 
     return
 
