@@ -20,28 +20,26 @@ __version__ = "0.1.0"
 __copyright__ = "Copyright (c) 2023 Cisco and/or its affiliates."
 __license__ = "Cisco Sample Code License, Version 1.1"
 
+import json
 import logging
 import os
 import time
-import json
-
 from datetime import datetime
+
 from dnacentersdk import DNACenterAPI
 from dotenv import load_dotenv
 from requests.auth import HTTPBasicAuth  # for Basic Auth
-from pprint import pprint
-
 
 load_dotenv('environment.env')
 
-DNAC_URL = os.getenv('DNAC_URL')
-DNAC_USER = os.getenv('DNAC_USER')
-DNAC_PASS = os.getenv('DNAC_PASS')
+CATALYST_CENTER_URL = os.getenv('CATALYST_CENTER_URL')
+CATALYST_CENTER_USER = os.getenv('CATALYST_CENTER_USER')
+CATALYST_CENTER_PASS = os.getenv('CATALYST_CENTER_PASS')
 
 os.environ['TZ'] = 'America/Los_Angeles'  # define the timezone for PST
 time.tzset()  # adjust the timezone, more info https://help.pythonanywhere.com/pages/SettingTheTimezone/
 
-DNAC_AUTH = HTTPBasicAuth(DNAC_USER, DNAC_PASS)
+CATALYST_CENTER_AUTH = HTTPBasicAuth(CATALYST_CENTER_USER, CATALYST_CENTER_PASS)
 
 
 def main():
@@ -61,10 +59,11 @@ def main():
     # verify if folder for state files exist
 
     # create a DNACenterAPI "Connection Object" to use the Python SDK
-    dnac_api = DNACenterAPI(username=DNAC_USER, password=DNAC_PASS, base_url=DNAC_URL, version='2.3.5.3',
-                            verify=False)
+    catalyst_center_ = DNACenterAPI(username=CATALYST_CENTER_USER, password=CATALYST_CENTER_PASS,
+                                    base_url=CATALYST_CENTER_URL, version='2.3.5.3',
+                                    verify=False)
 
-    get_compliance_response = dnac_api.compliance.get_compliance_detail()
+    get_compliance_response = catalyst_center_.compliance.get_compliance_detail()
     network_compliance_info = get_compliance_response['response']
     logging.info(' Collected Catalyst Center network compliance state')
 
@@ -90,7 +89,7 @@ def main():
         if item['status'] == 'NON_COMPLIANT':
             item_compliance = item['complianceType']
             device_id = item['deviceUuid']
-            device_info = dnac_api.devices.get_device_by_id(id=device_id)
+            device_info = catalyst_center_.devices.get_device_by_id(id=device_id)
             device_hostname = device_info['response']['hostname']
             compliance_report[item_compliance].append(device_hostname)
 
