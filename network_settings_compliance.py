@@ -20,22 +20,18 @@ __version__ = "0.1.0"
 __copyright__ = "Copyright (c) 2023 Cisco and/or its affiliates."
 __license__ = "Cisco Sample Code License, Version 1.1"
 
+import json
 import logging
 import os
 import time
-import json
-import yaml
-import base64
-import github_apis
-
-from github import Github
 from datetime import datetime
 
+import yaml
 from dnacentersdk import DNACenterAPI
 from dotenv import load_dotenv
 from requests.auth import HTTPBasicAuth  # for Basic Auth
-from pprint import pprint
 
+import github_apis
 
 load_dotenv('environment.env')
 
@@ -54,6 +50,7 @@ time.tzset()  # adjust the timezone, more info https://help.pythonanywhere.com/p
 
 CATALYST_CENTER_AUTH = HTTPBasicAuth(CATALYST_CENTER_USER, CATALYST_CENTER_PASS)
 FILE_NAME = 'intent_network_settings.yaml'
+
 
 def main():
     """
@@ -107,9 +104,6 @@ def main():
     response = catalyst_center_api.network_settings.get_network_v2(site_id)
     site_network_settings = response['response']
     logging.info(' Collected the site settings')
-
-    # prepare a network settings report
-    network_settings_report = {}
 
     # verify the settings for NTP
     network_settings_ntp_status = {'ntp': 'not_compliant'}
