@@ -54,7 +54,8 @@ FILE_NAME = 'intent_network_settings.yaml'
 
 def main():
     """
-    This app will pull network settings file from GitHub and identify if all sites are configured with the defined network settings.
+    This app will pull network settings file from GitHub and identify if Global site is configured with the defined
+    network settings. This validation could be performed for all sites.
     """
 
     # logging, debug level, to file {application_run.log}
@@ -63,8 +64,8 @@ def main():
     current_time = str(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     logging.info(' Application "network_settings_compliance.py" Start, ' + current_time)
 
-    # get the repos for user
-    repos = github_apis.get_private_repos()
+    # get all repos for user
+    repos = github_apis.get_private_repos(username=GITHUB_USERNAME, github_token=GITHUB_TOKEN)
 
     # verify if repo exists
     if GITHUB_REPO not in repos:
@@ -117,8 +118,7 @@ def main():
     # verify the settings for DNS
     network_settings_dns_status = {'dns': 'not_compliant'}
     for item in site_network_settings:
-        if item['instanceType'] == 'dns' and item['key'] == 'dns.server' and item['value'][0][
-            'primaryIpAddress'] == dns_server:
+        if item['instanceType'] == 'dns' and item['key'] == 'dns.server' and item['value'][0]['primaryIpAddress'] == dns_server:
             network_settings_dns_status.update({'dns': 'compliant'})
             break
 
@@ -130,8 +130,8 @@ def main():
             break
 
     # merge the compliance reports for each network settings
-    network_settings_report = {**network_settings_dns_status, **network_settings_ntp_status,
-                               **network_settings_banner_status}
+    site_report = {**network_settings_dns_status, **network_settings_ntp_status, **network_settings_banner_status}
+    network_settings_report = {'site_hierarchy': site_name_hierarchy, 'compliance_status': site_report}
 
     logging.info(' Network Settings compliance report:')
     logging.info('   ' + json.dumps(network_settings_report, indent=4))
