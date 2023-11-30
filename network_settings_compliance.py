@@ -73,7 +73,8 @@ def main():
     logging.info(' Repo "' + GITHUB_REPO + '" found!')
 
     # get the network settings intent file
-    intent_network_settings = github_apis.get_repo_file_content(username=GITHUB_USERNAME, repo_name=GITHUB_REPO, file_name=FILE_NAME)
+    intent_network_settings = github_apis.get_repo_file_content(username=GITHUB_USERNAME, repo_name=GITHUB_REPO,
+                                                                file_name=FILE_NAME)
     logging.info(' File "' + FILE_NAME + '" found!')
 
     # decode the YAMl file
@@ -92,7 +93,8 @@ def main():
     logging.info('   DNS server: ' + dns_server)
 
     # create a DNACenterAPI "Connection Object" to use the Python SDK
-    catalyst_center_api = DNACenterAPI(username=CATALYST_CENTER_USER, password=CATALYST_CENTER_PASS, base_url=CATALYST_CENTER_URL, version='2.3.5.3',
+    catalyst_center_api = DNACenterAPI(username=CATALYST_CENTER_USER, password=CATALYST_CENTER_PASS,
+                                       base_url=CATALYST_CENTER_URL, version='2.3.5.3',
                                        verify=False)
 
     # get the site Id for the site with the name
@@ -115,7 +117,8 @@ def main():
     # verify the settings for DNS
     network_settings_dns_status = {'dns': 'not_compliant'}
     for item in site_network_settings:
-        if item['instanceType'] == 'dns' and item['key'] == 'dns.server' and item['value'][0]['primaryIpAddress'] == dns_server:
+        if item['instanceType'] == 'dns' and item['key'] == 'dns.server' and item['value'][0][
+            'primaryIpAddress'] == dns_server:
             network_settings_dns_status.update({'dns': 'compliant'})
             break
 
@@ -127,10 +130,16 @@ def main():
             break
 
     # merge the compliance reports for each network settings
-    network_settings_report = {**network_settings_dns_status, **network_settings_ntp_status, **network_settings_banner_status}
+    network_settings_report = {**network_settings_dns_status, **network_settings_ntp_status,
+                               **network_settings_banner_status}
 
     logging.info(' Network Settings compliance report:')
-    logging.info('   ' + json.dumps(network_settings_report))
+    logging.info('   ' + json.dumps(network_settings_report, indent=4))
+
+    # save report to JSON formatted file
+    with open('network_settings_report.json', 'w') as f:
+        f.write(json.dumps(network_settings_report, indent=4))
+    logging.info(' Saved the network settings report to file "network_settings_report.json"')
 
     date_time = str(datetime.now().replace(microsecond=0))
     logging.info(' End of Application "network_settings_compliance.py" Run: ' + date_time)

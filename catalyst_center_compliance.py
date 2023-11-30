@@ -59,11 +59,11 @@ def main():
     # verify if folder for state files exist
 
     # create a DNACenterAPI "Connection Object" to use the Python SDK
-    catalyst_center_ = DNACenterAPI(username=CATALYST_CENTER_USER, password=CATALYST_CENTER_PASS,
-                                    base_url=CATALYST_CENTER_URL, version='2.3.5.3',
-                                    verify=False)
+    catalyst_center_api = DNACenterAPI(username=CATALYST_CENTER_USER, password=CATALYST_CENTER_PASS,
+                                       base_url=CATALYST_CENTER_URL, version='2.3.5.3',
+                                       verify=False)
 
-    get_compliance_response = catalyst_center_.compliance.get_compliance_detail()
+    get_compliance_response = catalyst_center_api.compliance.get_compliance_detail()
     network_compliance_info = get_compliance_response['response']
     logging.info(' Collected Catalyst Center network compliance state')
 
@@ -89,7 +89,7 @@ def main():
         if item['status'] == 'NON_COMPLIANT':
             item_compliance = item['complianceType']
             device_id = item['deviceUuid']
-            device_info = catalyst_center_.devices.get_device_by_id(id=device_id)
+            device_info = catalyst_center_api.devices.get_device_by_id(id=device_id)
             device_hostname = device_info['response']['hostname']
             compliance_report[item_compliance].append(device_hostname)
 
