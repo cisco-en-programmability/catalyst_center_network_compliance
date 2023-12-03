@@ -55,19 +55,21 @@ FILE_NAME = 'custom_network_compliance.yaml'
 
 def main():
     """
-    This application will pull custom configurations form GitHub:
+    This application will get custom CLI configurations form GitHub. It will identify if devices are configured with
+    the CLI commands based on specific rules.
+    The files from GitHub include:
      - filters to match the devices, example device role, family
-     - CLI commands that will be verified on each device
+     - CLI commands that will be validated on each device
     """
 
     # logging, debug level, to file {application_run.log}
     logging.basicConfig(level=logging.INFO)
 
     current_time = str(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-    logging.info(' Application "device_network_compliance.py" Start, ' + current_time)
+    logging.info(' Application "device_config_compliance.py" Start, ' + current_time)
 
     # get the repos for user
-    repos = github_apis.get_private_repos()
+    repos = github_apis.get_private_repos(username=GITHUB_USERNAME, github_token=GITHUB_TOKEN)
 
     # verify if repo exists
     if GITHUB_REPO not in repos:
@@ -75,7 +77,7 @@ def main():
         return
     logging.info(' Repo "' + GITHUB_REPO + '" found!')
 
-    # get the network settings intent file
+    # get the custom network compliance intent file
     file_content = github_apis.get_repo_file_content(username=GITHUB_USERNAME, repo_name=GITHUB_REPO,
                                                      file_name=FILE_NAME)
     logging.info(' File "' + FILE_NAME + '" found!')
@@ -213,7 +215,7 @@ def main():
                     logging.info('    ' + command)
 
     date_time = str(datetime.now().replace(microsecond=0))
-    logging.info(' End of Application "device_network_compliance.py" Run: ' + date_time)
+    logging.info(' End of Application "device_config_compliance.py" Run: ' + date_time)
 
     return
 
