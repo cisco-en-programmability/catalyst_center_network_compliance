@@ -109,25 +109,34 @@ def main():
     logging.info(' Collected the site settings')
 
     # verify the settings for NTP
-    network_settings_ntp_status = {'ntp': 'not_compliant'}
     for item in site_network_settings:
-        if item['instanceType'] == 'ip' and item['key'] == 'ntp.server' and item['value'][0] == ntp_server:
-            network_settings_ntp_status.update({'ntp': 'compliant'})
+        if item['instanceType'] == 'ip' and item['key'] == 'ntp.server' and item['value'][0] != ntp_server:
+            network_settings_ntp_status.update({'ntp': 'not_compliant'})
+            network_settings_ntp_status.update({'ntp_intent': ntp_server})
+            network_settings_ntp_status.update({'ntp_configured': item['value'][0]})
             break
+        else:
+            network_settings_ntp_status = {'ntp': 'compliant'}
 
     # verify the settings for DNS
-    network_settings_dns_status = {'dns': 'not_compliant'}
     for item in site_network_settings:
-        if item['instanceType'] == 'dns' and item['key'] == 'dns.server' and item['value'][0]['primaryIpAddress'] == dns_server:
-            network_settings_dns_status.update({'dns': 'compliant'})
+        if item['instanceType'] == 'dns' and item['key'] == 'dns.server' and item['value'][0]['primaryIpAddress'] != dns_server:
+            network_settings_dns_status = {'dns': 'not_compliant'}
+            network_settings_dns_status.update({'dns_intent': dns_server})
+            network_settings_dns_status.update({'dns_configured': item['value'][0]['primaryIpAddress']})
             break
+        else:
+            network_settings_dns_status = {'dns': 'compliant'}
 
     # verify the settings for Banner message
-    network_settings_banner_status = {'banner': 'not_compliant'}
     for item in site_network_settings:
-        if item['instanceType'] == 'banner' and item['value'][0]['bannerMessage'] == banner_message:
-            network_settings_banner_status.update({'banner': 'compliant'})
+        if item['instanceType'] == 'banner' and item['value'][0]['bannerMessage'] != banner_message:
+            network_settings_banner_status = {'banner': 'not_compliant'}
+            network_settings_banner_status.update({'banner_intent': banner_message})
+            network_settings_banner_status.update({'banner_configured': item['value'][0]['bannerMessage']})
             break
+        else:
+            network_settings_banner_status = {'banner': 'compliant'}
 
     # merge the compliance reports for each network settings
     site_report = {**network_settings_dns_status, **network_settings_ntp_status, **network_settings_banner_status}
