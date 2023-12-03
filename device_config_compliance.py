@@ -55,7 +55,7 @@ FILE_NAME = 'custom_network_compliance.yaml'
 
 def main():
     """
-    This application will get custom CLI configurations form GitHub. It will identify if devices are configured with
+    This application will get device config CLI configurations form GitHub. It will identify if devices are configured with
     the CLI commands based on specific rules.
     The files from GitHub include:
      - filters to match the devices, example device role, family
@@ -77,15 +77,13 @@ def main():
         return
     logging.info(' Repo "' + GITHUB_REPO + '" found!')
 
-    # get the custom network compliance intent file
+    # get the device config  compliance intent file
     file_content = github_apis.get_repo_file_content(username=GITHUB_USERNAME, repo_name=GITHUB_REPO,
                                                      file_name=FILE_NAME)
     logging.info(' File "' + FILE_NAME + '" found!')
 
-    # decode the YAMl file
-    intent_config = yaml.safe_load(file_content)
-
     # parse the input data
+    intent_config = yaml.safe_load(file_content)
     aaa_config = intent_config['aaa_config']['commands']
     ntp_config = intent_config['ntp_config']['commands']
 
@@ -93,7 +91,7 @@ def main():
     device_role = intent_config['device_filter']['device_role']
     device_family = intent_config['device_filter']['device_family']
 
-    logging.info(' Custom compliance settings from GitHub:')
+    logging.info(' Device configs from GitHub:')
     logging.info('   aaa_config: \n' + aaa_config)
     logging.info('   ntp_config: \n' + ntp_config)
 
@@ -105,7 +103,7 @@ def main():
     with open(NETWORK_CONFIGS_PATH + 'ntp_config.txt', 'w') as f:
         f.write(ntp_config)
 
-    logging.info(' Custom compliance device filter:')
+    logging.info(' Compliance device filter:')
     logging.info('   device_role: ' + device_role)
     logging.info('   device_family: ' + device_family)
 
@@ -118,7 +116,7 @@ def main():
     # get the device count
     response = catalyst_center_api.devices.get_device_count()
     device_count = response['response']
-    logging.info(' Number of devices managed by Cisco DNA Center: ' + str(device_count))
+    logging.info(' Number of devices managed by Catalyst Center: ' + str(device_count))
 
     # get the device info list
     offset = 1
@@ -128,7 +126,7 @@ def main():
         response = catalyst_center_api.devices.get_device_list(offset=offset)
         offset += limit
         device_list.extend(response['response'])
-    logging.info(' Collected the device list from Cisco DNA Center')
+    logging.info(' Collected the device list from Catalyst Center')
 
     # create device inventory, it will include all Catalyst Center device details
 
@@ -163,7 +161,7 @@ def main():
 
             device_inventory.append(device_details)
 
-    logging.info(' Collected the device inventory from Cisco DNA Center')
+    logging.info(' Retrieved the devices location and fabric role')
 
     # save device inventory to json formatted file
     with open(NETWORK_CONFIGS_PATH + 'device_inventory.json', 'w') as f:
@@ -183,7 +181,7 @@ def main():
 
             logging.info(' Device: ' + item['hostname'] + ' AAA config check:')
 
-            # check common lines between the two files - custom compliance commands and running config
+            # check common lines between the two files - device config compliance commands and running config
             aaa_config_file = open('aaa_config.txt', 'r').readlines()
             ntp_config_file = open('ntp_config.txt', 'r').readlines()
             config_file = open(item['hostname'] + '_config.txt', 'r').readlines()
