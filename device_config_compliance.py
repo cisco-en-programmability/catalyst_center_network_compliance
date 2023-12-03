@@ -78,7 +78,8 @@ def main():
     logging.info(' Repo "' + GITHUB_REPO + '" found!')
 
     # get the device config  compliance intent file
-    file_content = github_apis.get_repo_file_content(username=GITHUB_USERNAME, repo_name=GITHUB_REPO,
+    file_content = github_apis.get_repo_file_content(username=GITHUB_USERNAME,
+                                                     repo_name=GITHUB_REPO,
                                                      file_name=FILE_NAME)
     logging.info(' File "' + FILE_NAME + '" found!')
 
@@ -87,7 +88,7 @@ def main():
     aaa_config = intent_config['aaa_config']['commands']
     ntp_config = intent_config['ntp_config']['commands']
 
-    # parse the device rules
+    # parse the device policy
     device_role = intent_config['device_filter']['device_role']
     device_family = intent_config['device_filter']['device_family']
 
