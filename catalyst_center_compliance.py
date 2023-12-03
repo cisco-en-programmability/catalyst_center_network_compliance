@@ -25,6 +25,7 @@ import logging
 import os
 import time
 from datetime import datetime
+from pprint import pprint
 
 from dnacentersdk import DNACenterAPI
 from dotenv import load_dotenv
@@ -77,7 +78,7 @@ def main():
         if item_compliance not in compliance_type:
             compliance_type.append(item_compliance)
 
-    logging.info(' Type of compliance checks: ' + json.dumps(compliance_type))
+    logging.info(' Type of compliance checks: ' + json.dumps(compliance_type, indent=4))
 
     # create report for non-compliant devices for each compliance type
     compliance_report = {}
