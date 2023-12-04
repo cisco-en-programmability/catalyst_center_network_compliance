@@ -53,6 +53,7 @@ CATALYST_CENTER_AUTH = HTTPBasicAuth(CATALYST_CENTER_USER, CATALYST_CENTER_PASS)
 FILE_NAME = 'custom_network_compliance.yaml'
 
 
+# noinspection PyTypeChecker
 def main():
     """
     This application will get device config CLI configurations form GitHub. It will identify if devices are configured with
@@ -129,7 +130,7 @@ def main():
         device_list.extend(response['response'])
     logging.info(' Collected the device list from Catalyst Center')
 
-    # create device inventory, it will include all Catalyst Center device details
+    # create device inventory, add location and fabric roles
 
     device_inventory = []
     for device in device_list:
@@ -162,7 +163,7 @@ def main():
 
             device_inventory.append(device_details)
 
-    logging.info(' Retrieved the devices location and fabric role')
+    logging.info(' Retrieved the device location and fabric role')
 
     # save device inventory to json formatted file
     with open(NETWORK_CONFIGS_PATH + 'device_inventory.json', 'w') as f:
@@ -170,6 +171,7 @@ def main():
     logging.info(' Saved the device inventory to file "device_inventory.json"')
 
     os.chdir(NETWORK_CONFIGS_PATH)
+
     # collect the device configs for the devices that match the role
     logging.info(' Compliance checks for devices that match the device filter')
     for item in device_inventory:
@@ -179,26 +181,25 @@ def main():
             with open(item['hostname'] + '_config.txt', 'w') as f:
                 f.write(device_config)
             logging.info(' Saved the device config ' + item['hostname'] + '_config.txt')
-
-            logging.info(' Device: ' + item['hostname'] + ' AAA config check:')
+            logging.info(' Device: ' + item['hostname'] + ' :')
 
             # check common lines between the two files - device config compliance commands and running config
             aaa_config_file = open('aaa_config.txt', 'r').readlines()
             ntp_config_file = open('ntp_config.txt', 'r').readlines()
             config_file = open(item['hostname'] + '_config.txt', 'r').readlines()
 
-            aaa_difference = difflib.Differ(charjunk=lambda x: x in [',', '.', '-', "'"])
+            aaa_difference = difflib.Differ()
             aaa_commands_list = []
             for line in aaa_difference.compare(aaa_config_file, config_file):
                 if line.startswith('-'):
                     clean_line = line.strip()
                     aaa_commands_list.append(clean_line)
             if len(aaa_commands_list) == 0:
-                logging.info('    AAA config check passed')
+                logging.info('    - AAA config check passed')
             else:
-                logging.info('    AAA config check failed, missing commands:')
+                logging.info('    - AAA config check failed, missing commands:')
                 for command in aaa_commands_list:
-                    logging.info('    ' + command)
+                    logging.info('        ' + command)
 
             ntp_difference = difflib.Differ(charjunk=lambda x: x in [',', '.', '-', "'"])
             ntp_commands_list = []
@@ -207,11 +208,11 @@ def main():
                     clean_line = line.strip()
                     ntp_commands_list.append(clean_line)
             if len(ntp_commands_list) == 0:
-                logging.info('    NTP config check passed')
+                logging.info('    - NTP config check passed')
             else:
-                logging.info('    NTP config check failed, missing commands:')
+                logging.info('    - NTP config check failed, missing commands:')
                 for command in ntp_commands_list:
-                    logging.info('    ' + command)
+                    logging.info('        ' + command)
 
     date_time = str(datetime.now().replace(microsecond=0))
     logging.info(' End of Application "device_config_compliance.py" Run: ' + date_time)

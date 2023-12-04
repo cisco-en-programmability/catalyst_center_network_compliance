@@ -54,7 +54,7 @@ FILE_NAME = 'intent_network_settings.yaml'
 
 def main():
     """
-    This app will pull network settings file from GitHub and identify if Global site is configured with the defined
+    This app will pull network settings file from GitHub and identify if the specified site is configured with the defined
     network settings. This validation could be performed for all sites.
     """
 
@@ -111,7 +111,7 @@ def main():
     # verify the settings for NTP
     for item in site_network_settings:
         if item['instanceType'] == 'ip' and item['key'] == 'ntp.server' and item['value'][0] != ntp_server:
-            network_settings_ntp_status.update({'ntp': 'not_compliant'})
+            network_settings_ntp_status = ({'ntp': 'not_compliant'})
             network_settings_ntp_status.update({'ntp_intent': ntp_server})
             network_settings_ntp_status.update({'ntp_configured': item['value'][0]})
             break
