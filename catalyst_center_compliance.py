@@ -25,7 +25,6 @@ import logging
 import os
 import time
 from datetime import datetime
-from pprint import pprint
 
 from dnacentersdk import DNACenterAPI
 from dotenv import load_dotenv
@@ -46,7 +45,8 @@ CATALYST_CENTER_AUTH = HTTPBasicAuth(CATALYST_CENTER_USER, CATALYST_CENTER_PASS)
 def main():
     """
     This app will create a Catalyst Center non-compliant devices report, based on out-of-the-box compliance features.
-    It will call the compliance, device details APIs to identify all devices non-compliant for various compliance checks.
+    It will call the compliance and device details APIs to identify all devices non-compliant
+    for various compliance validations. It will create a report for non-compliant devices with role "CORE".
     The app may be part of a CI/CD pipeline to run on-demand or scheduled.
     This app is using the Python SDK to make REST API calls to Cisco DNA Center.
     """
@@ -102,6 +102,31 @@ def main():
     with open('compliance_report.json', 'w') as f:
         f.write(json.dumps(compliance_report, indent=4))
     logging.info(' Saved the non-compliant devices report to file "compliance_report.json"')
+
+    # create report for non-compliant core devices for each compliance type
+    compliance_report_core = {}
+    for item in compliance_type:
+        compliance_report_core.update({item: []})
+
+    # loop through each item in compliance and append to report, to the specific category
+    for item in network_compliance:
+        if item['status'] == 'NON_COMPLIANT':
+            item_compliance = item['complianceType']
+            device_id = item['deviceUuid']
+            device_info = catalyst_center_api.devices.get_device_by_id(id=device_id)
+            device_hostname = device_info['response']['hostname']
+            device_role = device_info['response']['role']
+            if device_role == 'CORE':
+                compliance_report_core[item_compliance].append(device_hostname)
+
+    logging.info(' Non-compliant Core devices report completed: ')
+
+    logging.info(' ' + json.dumps(compliance_report_core, indent=4))
+
+    # save report to JSON formatted file
+    with open('compliance_report_core.json', 'w') as f:
+        f.write(json.dumps(compliance_report, indent=4))
+    logging.info(' Saved the Core non-compliant devices report to file "compliance_report.json"')
 
     date_time = str(datetime.now().replace(microsecond=0))
     logging.info(' End of Application "catalyst_center_compliance.py" Run: ' + date_time)
