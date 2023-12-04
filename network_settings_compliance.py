@@ -56,6 +56,31 @@ def main():
     """
     This app will pull network settings file from GitHub and identify if the specified site is configured with the defined
     network settings. This validation could be performed for all sites.
+    Example:
+        ---
+        site_info:
+          site_name_hierarchy: Global/OR/PDX
+
+        banner:
+          message: This device is managed by Catalyst Center 10.93.141.45, version 2.3.7.3
+
+        netflow:
+          netflow_enabled: true
+
+        syslog:
+          syslog_enabled: true
+
+        telemetry:
+          telemetry_enabled: true
+
+        ntp_server:
+          server_ip: 171.68.38.66
+
+        dns_server:
+          server_ip: 171.70.168.183
+        ...
+    The app may be part of a CI/CD pipeline to run on-demand or scheduled.
+    This app is using the Python SDK to make REST API calls to Cisco DNA Center.
     """
 
     # logging, debug level, to file {application_run.log}

@@ -58,9 +58,30 @@ def main():
     """
     This application will get device config CLI configurations form GitHub. It will identify if devices are configured with
     the CLI commands based on specific rules.
-    The files from GitHub include:
-     - filters to match the devices, example device role, family
-     - CLI commands that will be validated on each device
+    The device config intent policy GitHub include:
+     - device family and role intent
+     - CLI commands that will be validated on each device matching the intent
+     Example:
+         ---
+        device_filter:
+          device_role: ACCESS
+          device_family: Cisco Catalyst 9300 Switch
+
+        aaa_config:
+          commands: |
+            aaa new-model
+            aaa authentication login default local
+            aaa authorization exec default local
+            aaa authorization network local
+
+        ntp_config:
+          commands: |
+            ntp source Loopback1
+            ntp server 171.68.38.66
+            ntp server 171.68.48.78
+        ...
+    The app may be part of a CI/CD pipeline to run on-demand or scheduled.
+    This app is using the Python SDK to make REST API calls to Cisco DNA Center.
     """
 
     # logging, debug level, to file {application_run.log}
